@@ -1,0 +1,34 @@
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.backend_bases import MouseEvent
+
+# ###############################################################
+#   Create a simple line segment every time a mouse is pressed
+# ################################################################
+
+
+class LineBuilder:
+    def __init__(self, line: Line2D):
+        self.line = line
+        self.xs = list(line.get_xdata())
+        self.ys = list(line.get_ydata())
+        self.cid = line.figure.canvas.mpl_connect("button_press_event", self)
+
+    def __call__(self, event: MouseEvent):
+        print("click", event)
+
+        if event.inaxes != self.line.axes:
+            return
+
+        self.xs.append(event.xdata)
+        self.ys.append(event.ydata)
+        self.line.set_data(self.xs, self.ys)
+        self.line.figure.canvas.draw()
+
+
+fig, ax = plt.subplots()
+ax.set_title("click to build line segments")
+(line,) = ax.plot([0], [0])  # empty line
+linebuilder = LineBuilder(line)
+
+plt.show()
